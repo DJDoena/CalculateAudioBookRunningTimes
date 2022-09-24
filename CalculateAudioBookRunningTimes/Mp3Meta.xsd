@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:element name="Mp3Meta" type="Mp3Meta" />
+
+  <xs:complexType name="RunningTime">    
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="Hours" type="xs:unsignedShort" use="required" />
+        <xs:attribute name="Minutes" type="xs:unsignedShort" use="required" />
+        <xs:attribute name="Seconds" type="xs:unsignedShort" use="required" />
+      </xs:extension>
+    </xs:simpleContent>    
+  </xs:complexType>
+
+  <xs:complexType name="Mp3Meta">
+    <xs:sequence>
+      <xs:element name="Title" type="xs:string" minOccurs="0" maxOccurs="1" />
+      <xs:element name="Author" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="Narrator" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="Genre" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="Description" type="xs:string" minOccurs="0" maxOccurs="1" />
+      <xs:element name="RunningTime" type="RunningTime" minOccurs="1" maxOccurs="1" />
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
