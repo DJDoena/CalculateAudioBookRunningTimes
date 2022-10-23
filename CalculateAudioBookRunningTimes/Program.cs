@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -67,9 +68,13 @@ namespace CalculateAudioBookRunningTimes
         {
             var dis = rootDI.GetDirectories("*.*", SearchOption.TopDirectoryOnly);
 
-            foreach (var di in dis)
+            Parallel.ForEach(dis, di =>
             {
                 if (rootDI.Name == "English" || rootDI.Name == "Deutsch")
+                {
+                    ProcessBooks(di);
+                }
+                else if (di.GetDirectories("*.*", SearchOption.TopDirectoryOnly).Length > 0)
                 {
                     ProcessBooks(di);
                 }
@@ -77,7 +82,7 @@ namespace CalculateAudioBookRunningTimes
                 {
                     ProcessBook(di);
                 }
-            }
+            });
         }
 
         private static void ProcessBook(DirectoryInfo di)
