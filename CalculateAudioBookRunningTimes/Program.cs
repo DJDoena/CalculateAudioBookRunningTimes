@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -193,9 +194,9 @@ namespace CalculateAudioBookRunningTimes
                 if (tag != null)
                 {
                     meta.Title = tag.Album;
-                    meta.Author = tag.AlbumArtists?.Select(a => a).ToArray();
-                    meta.Narrator = tag.Performers?.Select(p => p).ToArray();
-                    meta.Genre = tag.Genres?.Select(g => g).ToArray();
+                    meta.Author = tag.AlbumArtists?.SelectMany(a => Split(a)).ToArray();
+                    meta.Narrator = tag.Performers?.SelectMany(p => Split(p)).ToArray();
+                    meta.Genre = tag.Genres?.SelectMany(g => Split(g)).ToArray();
                     meta.Description = GetDescription(tag);
                 }
 
@@ -210,6 +211,8 @@ namespace CalculateAudioBookRunningTimes
                 return meta;
             }
         }
+
+        private static IEnumerable<string> Split(string text) => text.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim());
 
         private static string GetDescription(TagLib.Tag tag)
         {
