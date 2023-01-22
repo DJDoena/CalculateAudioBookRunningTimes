@@ -236,7 +236,11 @@ namespace CalculateAudioBookRunningTimes
 
         private static string GetDescription(TagLib.NonContainer.Tag tag)
         {
-            var texts = tag.Tags?.Where(t => t != null).OfType<TagLib.Id3v2.Tag>().SelectMany(t => t.OfType<TagLib.Id3v2.TextInformationFrame>()).ToList() ?? Enumerable.Empty<TagLib.Id3v2.TextInformationFrame>();
+            var texts = tag.Tags?
+                .Where(t => t != null)
+                .OfType<TagLib.Id3v2.Tag>()
+                .SelectMany(t => t.OfType<TagLib.Id3v2.TextInformationFrame>())
+                .ToList() ?? Enumerable.Empty<TagLib.Id3v2.TextInformationFrame>();
 
             var title3 = texts.FirstOrDefault(t => t.FrameId == "TIT3");
 
