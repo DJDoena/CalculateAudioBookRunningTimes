@@ -69,7 +69,7 @@ namespace CalculateAudioBookRunningTimes
         {
             var dis = rootDI.GetDirectories("*.*", SearchOption.TopDirectoryOnly);
 
-            Parallel.ForEach(dis, di =>
+            Parallel.ForEach(dis, new ParallelOptions() { MaxDegreeOfParallelism = 4 }, di =>
             {
                 if (rootDI.Name == "English" || rootDI.Name == "Deutsch")
                 {
@@ -97,11 +97,22 @@ namespace CalculateAudioBookRunningTimes
                 return;
             }
 
-            Console.WriteLine($"Processing '{di.Name}'.");
+            try
+            {
+                Console.WriteLine($"Processing '{di.Name}'.");
 
-            var length = GetLength(di);
+                var length = GetLength(di);
 
-            CreateXml(di, length, outFileName);
+                CreateXml(di, length, outFileName);
+            }
+            catch (AggregateException aggrEx)
+            {
+                Console.WriteLine($"Error processing '{di.Name}' {aggrEx.InnerException?.Message ?? aggrEx.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error processing '{di.Name}' {ex.Message}");
+            }
         }
 
         private static (ushort hours, ushort minutes, ushort seconds) GetLength(DirectoryInfo di)
