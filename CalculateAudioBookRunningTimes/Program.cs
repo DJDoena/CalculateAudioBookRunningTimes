@@ -125,7 +125,7 @@ namespace CalculateAudioBookRunningTimes
             {
                 Console.WriteLine($"Processing '{fi.Name}'.");
 
-                using (var reader = new NAudio.Wave.Mp3FileReader(fi.FullName))
+                using (var reader = new NAudio.Wave.MediaFoundationReader(fi.FullName))
                 {
                     totalLength += reader.TotalTime;
                 }
