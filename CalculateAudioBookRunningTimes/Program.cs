@@ -15,6 +15,13 @@ namespace CalculateAudioBookRunningTimes
 
         private static readonly XmlSerializer _serializer = new XmlSerializer(typeof(Mp3Meta));
 
+        private static readonly object _lock;
+
+        static Program()
+        {
+            _lock = new object();
+        }
+
         public static void Main(string[] args)
         {
             if (args.Length == 0)
@@ -99,7 +106,10 @@ namespace CalculateAudioBookRunningTimes
 
             try
             {
-                Console.WriteLine($"Processing '{di.Name}'.");
+                lock (_lock)
+                {
+                    Console.WriteLine($"Processing '{di.Name}'.");
+                }
 
                 var length = GetLength(di);
 
@@ -107,11 +117,17 @@ namespace CalculateAudioBookRunningTimes
             }
             catch (AggregateException aggrEx)
             {
-                Console.WriteLine($"Error processing '{di.Name}' {aggrEx.InnerException?.Message ?? aggrEx.Message}");
+                lock (_lock)
+                {
+                    Console.WriteLine($"Error processing '{di.Name}' {aggrEx.InnerException?.Message ?? aggrEx.Message}");
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error processing '{di.Name}' {ex.Message}");
+                lock (_lock)
+                {
+                    Console.WriteLine($"Error processing '{di.Name}' {ex.Message}");
+                }
             }
         }
 
@@ -202,11 +218,91 @@ namespace CalculateAudioBookRunningTimes
 
                 var meta = new Mp3Meta();
 
+                var people = (tag.AlbumArtists?.SelectMany(a => Split(a)) ?? Enumerable.Empty<string>())
+                    .Union(tag.Performers?.SelectMany(p => Split(p)) ?? Enumerable.Empty<string>())
+                    .Union(tag.Artists?.SelectMany(p => Split(p)) ?? Enumerable.Empty<string>())
+                    .ToList();
+
+                var bookName = !string.IsNullOrWhiteSpace(tag.Album)
+                    ? tag.Album
+                    : fi.Directory.Name;
+
+                var authors = new List<string>();
+
+                var narrators = new List<string>();
+
+                foreach (var p in people)
+                {
+                    var answer = string.Empty;
+
+                    lock (_lock)
+                    {
+                        while (answer != "a" && answer != "n" && answer != "b")
+                        {
+                            Console.Write($"Is {p} (a)uthor, (n)arrator or (b) for '{bookName}'? ");
+
+                            answer = Console.ReadLine();
+                        }
+                    }
+
+                    switch (answer)
+                    {
+                        case "a":
+                            {
+                                authors.Add(p);
+
+                                break;
+                            }
+                        case "n":
+                            {
+                                narrators.Add(p);
+
+                                break;
+                            }
+                        case "b":
+                            {
+                                authors.Add(p);
+
+                                narrators.Add(p);
+
+                                break;
+                            }
+                    }
+                }
+
+                if (authors.Count == 0)
+                {
+                    var answer = string.Empty;
+
+                    lock (_lock)
+                    {
+                        Console.Write($"No author found for '{bookName}'. Please enter author: ");
+
+                        answer = Console.ReadLine();
+                    }
+
+                    authors.Add(answer);
+                }
+
+                if (narrators.Count == 0)
+                {
+                    var answer = string.Empty;
+
+                    lock (_lock)
+                    {
+                        Console.Write($"No narrator found for '{bookName}'. Please enter narrator: ");
+
+                        answer = Console.ReadLine();
+                    }
+
+                    narrators.Add(answer);
+                }
+
                 if (tag != null)
                 {
-                    meta.Title = tag.Album;
-                    meta.Author = tag.AlbumArtists?.SelectMany(a => Split(a)).ToArray();
-                    meta.Narrator = tag.Performers?.SelectMany(p => Split(p)).ToArray();
+                    meta.Title = bookName;
+                    meta.Author = authors.ToArray();
+                    meta.Narrator = narrators.ToArray();
                     meta.Genre = tag.Genres?.SelectMany(g => Split(g)).ToArray();
                     meta.Description = GetDescription(tag);
                 }
