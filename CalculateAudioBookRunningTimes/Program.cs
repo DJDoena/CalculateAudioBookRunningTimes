@@ -1,21 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Serialization;
+using DoenaSoft.MediaInfoHelper.DataObjects.AudioBookMetaXml;
+using DoenaSoft.MediaInfoHelper.Readers;
 
 namespace CalculateAudioBookRunningTimes
 {
     public static class Program
     {
-        private static bool _reboot;
-
-        private static readonly XmlSerializer _serializer = new XmlSerializer(typeof(Mp3Meta));
-
         private static readonly object _lock;
+
+        private static bool _reboot;
 
         static Program()
         {
@@ -47,22 +42,22 @@ namespace CalculateAudioBookRunningTimes
                 }
             }
 
-            var di = new DirectoryInfo(args[0]);
+            var folder = new DirectoryInfo(args[0]);
 
-            if (!di.Exists)
+            if (!folder.Exists)
             {
-                Console.WriteLine($"'{di.FullName}' is not a valid directory.");
+                Console.WriteLine($"'{folder.FullName}' is not a valid directory.");
 
                 return;
             }
 
             if (args.Length == 1)
             {
-                ProcessBook(di);
+                ProcessBook(folder);
             }
             else if (args[1].ToLower() == "/m")
             {
-                ProcessBooks(di);
+                ProcessBooks(folder);
             }
             else
             {
@@ -72,32 +67,32 @@ namespace CalculateAudioBookRunningTimes
             }
         }
 
-        private static void ProcessBooks(DirectoryInfo rootDI)
+        private static void ProcessBooks(DirectoryInfo rootFolder)
         {
-            var dis = rootDI.GetDirectories("*.*", SearchOption.TopDirectoryOnly);
+            var folders = rootFolder.GetDirectories("*.*", SearchOption.TopDirectoryOnly);
 
-            Parallel.ForEach(dis, new ParallelOptions() { MaxDegreeOfParallelism = 4 }, di =>
+            Parallel.ForEach(folders, new ParallelOptions() { MaxDegreeOfParallelism = 4 }, folder =>
             {
-                if (rootDI.Name == "English" || rootDI.Name == "Deutsch")
+                if (rootFolder.Name == "English" || rootFolder.Name == "Deutsch")
                 {
-                    ProcessBooks(di);
+                    ProcessBooks(folder);
                 }
-                else if (di.GetDirectories("*.*", SearchOption.TopDirectoryOnly).Length > 0)
+                else if (folder.GetDirectories("*.*", SearchOption.TopDirectoryOnly).Length > 0)
                 {
-                    ProcessBooks(di);
+                    ProcessBooks(folder);
                 }
                 else
                 {
-                    ProcessBook(di);
+                    ProcessBook(folder);
                 }
             });
         }
 
-        private static void ProcessBook(DirectoryInfo di)
+        private static void ProcessBook(DirectoryInfo folder)
         {
-            var outFileName = Path.Combine(di.FullName, $"{di.Name}.xml");
+            var metaFileName = Path.Combine(folder.FullName, $"{folder.Name}.xml");
 
-            if (_reboot && File.Exists(outFileName))
+            if (_reboot && File.Exists(metaFileName))
             {
                 //UpdateXml(di, outFileName);
 
@@ -108,306 +103,117 @@ namespace CalculateAudioBookRunningTimes
             {
                 lock (_lock)
                 {
-                    Console.WriteLine($"Processing '{di.Name}'.");
+                    Console.WriteLine($"Processing '{folder.Name}'.");
                 }
 
-                var length = GetLength(di);
-
-                CreateXml(di, length, outFileName);
+                (new AudioBookReader(GetRole
+                    , (bookTitle) => GetName(bookTitle, "author")
+                    , (bookTitle) => GetName(bookTitle, "narrator")
+                    , Log))
+                    .CreateXml(folder, metaFileName);
             }
             catch (AggregateException aggrEx)
             {
                 lock (_lock)
                 {
-                    Console.WriteLine($"Error processing '{di.Name}' {aggrEx.InnerException?.Message ?? aggrEx.Message}");
+                    Console.WriteLine($"Error processing '{folder.Name}' {aggrEx.InnerException?.Message ?? aggrEx.Message}");
                 }
             }
             catch (Exception ex)
             {
                 lock (_lock)
                 {
-                    Console.WriteLine($"Error processing '{di.Name}' {ex.Message}");
+                    Console.WriteLine($"Error processing '{folder.Name}' {ex.Message}");
                 }
             }
         }
 
-        private static (ushort hours, ushort minutes, ushort seconds) GetLength(DirectoryInfo di)
+        private static BookRole GetRole(string bookTitle, string person)
         {
-            var fis = di.GetFiles("*.mp3", SearchOption.AllDirectories);
+            var answer = string.Empty;
 
-            var totalLength = new TimeSpan(0);
-
-            foreach (var fi in fis.OrderBy(fi => fi.FullName))
+            lock (_lock)
             {
-                Console.WriteLine($"Processing '{fi.Name}'.");
-
-                using (var reader = new NAudio.Wave.MediaFoundationReader(fi.FullName))
+                while (answer != "a" && answer != "n" && answer != "b")
                 {
-                    totalLength += reader.TotalTime;
+                    Console.Write($"Is {person} (a)uthor, (n)arrator or (b) for '{bookTitle}'? ");
+
+                    answer = Console.ReadLine();
                 }
             }
 
-            var length = GetLength(totalLength);
-
-            return length;
-        }
-
-        private static (ushort hours, ushort minutes, ushort seconds) GetLength(TimeSpan totalLength)
-        {
-            var days = totalLength.Days;
-
-            var hours = totalLength.Hours;
-
-            var minutes = totalLength.Minutes;
-
-            var seconds = totalLength.Seconds;
-
-            if (totalLength.Milliseconds >= 500)
+            switch (answer)
             {
-                seconds++;
-            }
-
-            if (seconds == 60)
-            {
-                seconds = 0;
-
-                minutes++;
-            }
-
-            if (minutes == 60)
-            {
-                minutes = 0;
-
-                hours++;
-            }
-
-            if (hours == 24)
-            {
-                hours = 0;
-
-                days++;
-            }
-
-            if (days > 0)
-            {
-                hours += days * 24;
-            }
-
-            return ((ushort)hours, (ushort)minutes, (ushort)seconds);
-        }
-
-        private static void CreateXml(DirectoryInfo di, (ushort hours, ushort minutes, ushort seconds) length, string outFileName)
-        {
-            var fi = di.GetFiles("*.mp3", SearchOption.AllDirectories).OrderBy(f => f.FullName).FirstOrDefault();
-
-            if (fi == null)
-            {
-                return;
-            }
-
-            var mp3Meta = GetTagMeta(fi, length);
-
-            WriteXml(outFileName, mp3Meta);
-        }
-
-        private static Mp3Meta GetTagMeta(FileInfo fi, (ushort hours, ushort minutes, ushort seconds) length)
-        {
-            using (var fileMeta = TagLib.File.Create(fi.FullName))
-            {
-                var tag = fileMeta?.Tag;
-
-                var meta = new Mp3Meta();
-
-                var people = (tag.AlbumArtists?.SelectMany(a => Split(a)) ?? Enumerable.Empty<string>())
-                    .Union(tag.Performers?.SelectMany(p => Split(p)) ?? Enumerable.Empty<string>())
-                    .Union(tag.Artists?.SelectMany(p => Split(p)) ?? Enumerable.Empty<string>())
-                    .ToList();
-
-                var bookName = !string.IsNullOrWhiteSpace(tag.Album)
-                    ? tag.Album
-                    : fi.Directory.Name;
-
-                var authors = new List<string>();
-
-                var narrators = new List<string>();
-
-                foreach (var p in people)
-                {
-                    var answer = string.Empty;
-
-                    lock (_lock)
+                case "a":
                     {
-                        while (answer != "a" && answer != "n" && answer != "b")
-                        {
-                            Console.Write($"Is {p} (a)uthor, (n)arrator or (b) for '{bookName}'? ");
-
-                            answer = Console.ReadLine();
-                        }
+                        return BookRole.Author;
                     }
-
-                    switch (answer)
+                case "n":
                     {
-                        case "a":
-                            {
-                                authors.Add(p);
-
-                                break;
-                            }
-                        case "n":
-                            {
-                                narrators.Add(p);
-
-                                break;
-                            }
-                        case "b":
-                            {
-                                authors.Add(p);
-
-                                narrators.Add(p);
-
-                                break;
-                            }
+                        return BookRole.Narrator;
                     }
-                }
-
-                if (authors.Count == 0)
-                {
-                    var answer = string.Empty;
-
-                    lock (_lock)
+                case "b":
                     {
-                        Console.Write($"No author found for '{bookName}'. Please enter author: ");
-
-                        answer = Console.ReadLine();
+                        return BookRole.Author | BookRole.Narrator;
                     }
-
-                    authors.Add(answer);
-                }
-
-                if (narrators.Count == 0)
-                {
-                    var answer = string.Empty;
-
-                    lock (_lock)
+                default:
                     {
-                        Console.Write($"No narrator found for '{bookName}'. Please enter narrator: ");
-
-                        answer = Console.ReadLine();
+                        return BookRole.Undefined;
                     }
-
-                    narrators.Add(answer);
-                }
-
-                if (tag != null)
-                {
-                    meta.Title = bookName;
-                    meta.Author = authors.ToArray();
-                    meta.Narrator = narrators.ToArray();
-                    meta.Genre = tag.Genres?.SelectMany(g => Split(g)).ToArray();
-                    meta.Description = GetDescription(tag);
-                }
-
-                meta.RunningTime = new RunningTime()
-                {
-                    Hours = length.hours,
-                    Minutes = length.minutes,
-                    Seconds = length.seconds,
-                    Value = $"{length.hours}:{length.minutes:D2}:{length.seconds:D2}",
-                };
-
-                return meta;
             }
         }
 
-        private static IEnumerable<string> Split(string text) => text.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim());
-
-        private static string GetDescription(TagLib.Tag tag)
+        private static string GetName(string bookTitle, string role)
         {
-            var result = tag is TagLib.NonContainer.Tag nct
-                ? GetDescription(nct)
-                : tag.Comment;
+            var answer = string.Empty;
 
-            return result?.Trim();
+            lock (_lock)
+            {
+                Console.Write($"No {role} found for '{bookTitle}'. Please enter {role}: ");
+
+                answer = Console.ReadLine();
+            }
+
+            return answer;
         }
 
-        private static string GetDescription(TagLib.NonContainer.Tag tag)
+        private static void Log(string message)
         {
-            var texts = tag.Tags?
-                .Where(t => t != null)
-                .OfType<TagLib.Id3v2.Tag>()
-                .SelectMany(t => t.OfType<TagLib.Id3v2.TextInformationFrame>())
-                .ToList() ?? Enumerable.Empty<TagLib.Id3v2.TextInformationFrame>();
-
-            var title3 = texts.FirstOrDefault(t => t.FrameId == "TIT3");
-
-            if (title3?.Text.Length > 0)
+            lock (_lock)
             {
-                var sb = new StringBuilder();
-
-                foreach (var text in title3.Text)
-                {
-                    sb.AppendLine(text);
-                }
-
-                return sb.ToString();
-            }
-            else
-            {
-                return tag.Comment;
+                Console.WriteLine(message);
             }
         }
 
-        private static void WriteXml(string outFileName, Mp3Meta mp3Meta)
-        {
-            using (var fs = new FileStream(outFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-            {
-                using (var xtw = new XmlTextWriter(fs, Encoding.UTF8))
-                {
-                    xtw.Formatting = Formatting.Indented;
-                    xtw.Namespaces = false;
+        //private void UpdateXml(DirectoryInfo folder, string outFileName)
+        //{
+        //    var fi = folder.GetFiles("*.mp3", SearchOption.AllDirectories).OrderBy(f => f.FullName).FirstOrDefault();
 
-                    var ns = new XmlSerializerNamespaces();
+        //    if (fi == null)
+        //    {
+        //        return;
+        //    }
 
-                    ns.Add(string.Empty, string.Empty);
+        //    var existingMeta = XmlSerializer<Mp3Meta>.Deserialize(outFileName);
 
-                    _serializer.Serialize(xtw, mp3Meta, ns);
-                }
-            }
-        }
+        //    var newMeta = this.GetTagMeta(fi, existingMeta.RunningTime);
 
-        private static void UpdateXml(DirectoryInfo di, string outFileName)
-        {
-            var fi = di.GetFiles("*.mp3", SearchOption.AllDirectories).OrderBy(f => f.FullName).FirstOrDefault();
+        //    newMeta.Title = existingMeta.Title;
+        //    newMeta.Description = existingMeta.Description;
 
-            if (fi == null)
-            {
-                return;
-            }
+        //    if (newMeta.Author != null && newMeta.Author.Length > 0
+        //        && newMeta.Narrator != null && newMeta.Narrator.Length > 0
+        //        && newMeta.Author[0] == newMeta.Narrator[0])
+        //    {
+        //        Console.WriteLine($"Use narrator '{newMeta.Narrator[0]}' for title '{newMeta.Title}'?");
 
-            Mp3Meta existingMeta;
-            using (var fs = new FileStream(outFileName, FileMode.Open, FileAccess.Read, FileShare.None))
-            {
-                existingMeta = (Mp3Meta)_serializer.Deserialize(fs);
-            }
+        //        if (Console.ReadKey().Key != ConsoleKey.Y)
+        //        {
+        //            newMeta.Narrator = null;
+        //        }
+        //    }
 
-            var newMeta = GetTagMeta(fi, (existingMeta.RunningTime.Hours, existingMeta.RunningTime.Minutes, existingMeta.RunningTime.Seconds));
-
-            newMeta.Title = existingMeta.Title;
-            newMeta.Description = existingMeta.Description;
-
-            if (newMeta.Author != null && newMeta.Author.Length > 0
-                && newMeta.Narrator != null && newMeta.Narrator.Length > 0
-                && newMeta.Author[0] == newMeta.Narrator[0])
-            {
-                Console.WriteLine($"Use narrator '{newMeta.Narrator[0]}' for title '{newMeta.Title}'?");
-
-                if (Console.ReadKey().Key != ConsoleKey.Y)
-                {
-                    newMeta.Narrator = null;
-                }
-            }
-
-            WriteXml(outFileName, newMeta);
-        }
+        //    WriteXml(outFileName, newMeta);
+        //}
     }
 }
