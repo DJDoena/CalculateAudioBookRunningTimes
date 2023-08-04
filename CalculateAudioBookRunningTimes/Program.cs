@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using DoenaSoft.MediaInfoHelper.DataObjects.AudioBookMetaXml;
 using DoenaSoft.MediaInfoHelper.Readers;
 
-namespace CalculateAudioBookRunningTimes
+namespace DoenaSoft.CalculateAudioBookRunningTimes
 {
     public static class Program
     {
