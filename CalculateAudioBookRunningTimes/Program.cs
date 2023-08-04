@@ -94,8 +94,6 @@ namespace DoenaSoft.CalculateAudioBookRunningTimes
 
             if (_reboot && File.Exists(metaFileName))
             {
-                //UpdateXml(di, outFileName);
-
                 return;
             }
 
@@ -184,36 +182,5 @@ namespace DoenaSoft.CalculateAudioBookRunningTimes
                 Console.WriteLine(message);
             }
         }
-
-        //private void UpdateXml(DirectoryInfo folder, string outFileName)
-        //{
-        //    var fi = folder.GetFiles("*.mp3", SearchOption.AllDirectories).OrderBy(f => f.FullName).FirstOrDefault();
-
-        //    if (fi == null)
-        //    {
-        //        return;
-        //    }
-
-        //    var existingMeta = XmlSerializer<Mp3Meta>.Deserialize(outFileName);
-
-        //    var newMeta = this.GetTagMeta(fi, existingMeta.RunningTime);
-
-        //    newMeta.Title = existingMeta.Title;
-        //    newMeta.Description = existingMeta.Description;
-
-        //    if (newMeta.Author != null && newMeta.Author.Length > 0
-        //        && newMeta.Narrator != null && newMeta.Narrator.Length > 0
-        //        && newMeta.Author[0] == newMeta.Narrator[0])
-        //    {
-        //        Console.WriteLine($"Use narrator '{newMeta.Narrator[0]}' for title '{newMeta.Title}'?");
-
-        //        if (Console.ReadKey().Key != ConsoleKey.Y)
-        //        {
-        //            newMeta.Narrator = null;
-        //        }
-        //    }
-
-        //    WriteXml(outFileName, newMeta);
-        //}
     }
 }
