@@ -132,9 +132,9 @@ namespace DoenaSoft.CalculateAudioBookRunningTimes
 
             lock (_lock)
             {
-                while (answer != "a" && answer != "n" && answer != "b")
+                while (answer != "a" && answer != "n" && answer != "b" && answer != "s")
                 {
-                    Console.Write($"Is {person} (a)uthor, (n)arrator or (b) for '{bookTitle}'? ");
+                    Console.Write($"Is {person} (a)uthor, (n)arrator, (b)oth or (s)kip for '{bookTitle}'? ");
 
                     answer = Console.ReadLine();
                 }
