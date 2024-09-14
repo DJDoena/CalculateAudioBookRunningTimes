@@ -26,6 +26,20 @@ namespace DoenaSoft.CalculateAudioBookRunningTimes
                 return;
             }
 
+            if (args.Length >= 1 && args[0].ToLower() == "/getpath")
+            {
+                string path;
+                do
+                {
+                    Console.WriteLine("Enter path:");
+
+                    path = Console.ReadLine();
+
+                } while (!Directory.Exists(path));
+
+                args[0] = path;
+            }
+
             _reboot = false;
 
             if (args.Length == 3)

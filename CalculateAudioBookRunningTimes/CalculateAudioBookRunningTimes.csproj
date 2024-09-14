@@ -1,19 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net481</TargetFramework>
-		<OutputType>Exe</OutputType>
-		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-		<Platforms>x64</Platforms>
-		<RootNamespace>DoenaSoft.CalculateAudioBookRunningTimes</RootNamespace>
 		<AssemblyName>CalculateAudioBookRunningTimes</AssemblyName>
+		<RootNamespace>DoenaSoft.CalculateAudioBookRunningTimes</RootNamespace>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net481</TargetFramework>
+		<Platforms>x64</Platforms>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<Version>$([System.DateTime]::Now.ToString("yyyy.MM.dd.HHmm"))</Version>
 		<FileVersion>$([System.DateTime]::Now.ToString("yyyy.MM.dd.HHmm"))</FileVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="DoenaSoft.MediaInfoHelper">
-			<Version>3.1.2</Version>
+			<Version>3.1.5</Version>
 		</PackageReference>
 	</ItemGroup>
 
