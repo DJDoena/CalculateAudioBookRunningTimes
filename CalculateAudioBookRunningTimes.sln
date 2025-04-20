@@ -4,6 +4,8 @@ VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CalculateAudioBookRunningTimes", "CalculateAudioBookRunningTimes\CalculateAudioBookRunningTimes.csproj", "{89994FB2-5025-467B-A671-B9EB0AE230C6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UpdateAudioBookMeta", "UpdateAudioBookMeta\UpdateAudioBookMeta.csproj", "{D9D8A174-5943-41D8-AFE6-09A39E2AEC5D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -11,6 +13,8 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{89994FB2-5025-467B-A671-B9EB0AE230C6}.Debug|x64.ActiveCfg = Debug|x64
 		{89994FB2-5025-467B-A671-B9EB0AE230C6}.Debug|x64.Build.0 = Debug|x64
+		{D9D8A174-5943-41D8-AFE6-09A39E2AEC5D}.Debug|x64.ActiveCfg = Debug|x64
+		{D9D8A174-5943-41D8-AFE6-09A39E2AEC5D}.Debug|x64.Build.0 = Debug|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
