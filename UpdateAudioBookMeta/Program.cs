@@ -3,12 +3,12 @@ using DoenaSoft.MediaInfoHelper.DataObjects.AudioBookMetaXml;
 using DoenaSoft.ToolBox.Generics;
 using DoenaSoft.UpdateAudioBookMeta;
 
+Console.WriteLine($"v{typeof(Program).Assembly.GetName().Version}");
+
 var fileNames = Directory.GetFiles(@"N:\Drive3\AudioBooks", "*.xml", SearchOption.AllDirectories);
 
 foreach (var fileName in fileNames)
 {
-    Console.WriteLine($"v {typeof(Program).Assembly.GetName().Version}");
-
     if (fileName == @"N:\Drive3\AudioBooks\audiobooks.xml")
     {
         continue;

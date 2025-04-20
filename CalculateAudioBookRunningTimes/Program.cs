@@ -17,7 +17,7 @@ public static class Program
 
     public static void Main(string[] args)
     {
-        Console.WriteLine($"v {typeof(Program).Assembly.GetName().Version}");
+        Console.WriteLine($"v{typeof(Program).Assembly.GetName().Version}");
 
         if (args.Length == 0)
         {
