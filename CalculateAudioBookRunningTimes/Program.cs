@@ -10,6 +10,8 @@ public static class Program
 
     private static bool _reboot;
 
+    private static bool _mp4;
+
     static Program()
     {
         _lock = new object();
@@ -26,9 +28,9 @@ public static class Program
             return;
         }
 
-        if (args.Length >= 1 && args[0].ToLower() == "/getpath")
+        string path;
+        if (args.Any(a => a == "/getpath"))
         {
-            string path;
             do
             {
                 Console.WriteLine("Enter path:");
@@ -36,27 +38,17 @@ public static class Program
                 path = Console.ReadLine();
 
             } while (!Directory.Exists(path));
-
-            args[0] = path;
         }
-
-        _reboot = false;
-
-        if (args.Length == 3)
+        else
         {
-            if (args[2].ToLower() == "/r")
-            {
-                _reboot = true;
-            }
-            else
-            {
-                Console.WriteLine($"Invalid parameter '{args[2]}'. Should be '/r'.");
-
-                return;
-            }
+            path = args[0];
         }
 
-        var folder = new DirectoryInfo(args[0]);
+        _reboot = args.Any(a => a == "/r");
+
+        _mp4 = args.Any(a => a == "/mp4");
+
+        var folder = new DirectoryInfo(path);
 
         if (!folder.Exists)
         {
@@ -65,19 +57,13 @@ public static class Program
             return;
         }
 
-        if (args.Length == 1)
-        {
-            ProcessBook(folder);
-        }
-        else if (args[1].ToLower() == "/m")
+        if (args.Any(a => a == "/m"))
         {
             ProcessBooks(folder);
         }
         else
         {
-            Console.WriteLine($"Invalid parameter '{args[1]}'. Should be '/m'.");
-
-            return;
+            ProcessBook(folder);
         }
     }
 
@@ -118,11 +104,15 @@ public static class Program
                 Console.WriteLine($"Processing '{folder.Name}'.");
             }
 
+            var filePattern = _mp4
+                ? "*.mp4"
+                : "*.mp3";
+
             var mp3Meta = (new AudioBookReader(GetRole
                 , (bookTitle) => GetName(bookTitle, "author")
                 , (bookTitle) => GetName(bookTitle, "narrator")
                 , Log))
-                .GetMeta(folder);
+                .GetMeta(folder, filePattern);
 
             (new XsltSerializer<AudioBookMeta>(new RootItemXsltSerializerDataProvider())).Serialize(metaFileName, mp3Meta);
         }
