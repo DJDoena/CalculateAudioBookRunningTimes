@@ -35,7 +35,7 @@ public static class Program
             {
                 Console.WriteLine("Enter path:");
 
-                path = Console.ReadLine();
+                path = Console.ReadLine().Trim().Trim('"');
 
             } while (!Directory.Exists(path));
         }
