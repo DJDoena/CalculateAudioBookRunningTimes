@@ -1,0 +1,12 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Project Path="CalculateAudioBookRunningTimes/CalculateAudioBookRunningTimes.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="UpdateAudioBookMeta/UpdateAudioBookMeta.csproj">
+    <Platform Project="x64" />
+  </Project>
+</Solution>
