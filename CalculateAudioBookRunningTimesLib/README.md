@@ -39,7 +39,7 @@ dotnet add package DoenaSoft.CalculateAudioBookRunningTimes
 
 ## Target Framework
 
-- .NET Framework 4.8.1
+- .NET Framework 4.7.2 /  4.8.1
 
 ## Dependencies
 

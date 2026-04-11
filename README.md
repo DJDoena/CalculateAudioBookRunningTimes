@@ -15,7 +15,7 @@ A command-line utility for scanning audiobook collections and generating detaile
 
 ## Requirements
 
-- .NET Framework 4.8.1 or higher
+- .NET Framework 4.7.2 or higher
 - Windows OS (x64)
 - [MediaInfo library](https://mediaarea.net/en/MediaInfo) (automatically handled by DoenaSoft.MediaInfoHelper)
 

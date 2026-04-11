@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
   <Project Path="CalculateAudioBookRunningTimes/CalculateAudioBookRunningTimes.csproj" />
   <Project Path="CalculateAudioBookRunningTimesLib/CalculateAudioBookRunningTimesLib.csproj" />
   <Project Path="UpdateAudioBookMeta/UpdateAudioBookMeta.csproj" />
