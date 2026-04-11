@@ -8,14 +8,14 @@
 		<Platforms>x64</Platforms>
 		<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<LangVersion>12.0</LangVersion>
+		<LangVersion>latest</LangVersion>
 		<Version>$([System.DateTime]::Now.ToString("yyyy.MM.dd.HHmm"))</Version>
 		<FileVersion>$([System.DateTime]::Now.ToString("yyyy.MM.dd.HHmm"))</FileVersion>
 		<Configurations>Debug</Configurations>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="DoenaSoft.MediaInfoHelper" Version="3.1.10" />
+	  <PackageReference Include="DoenaSoft.MediaInfoHelper" Version="3.1.12" />
 	</ItemGroup>
 
 </Project>

@@ -1,21 +1,8 @@
-﻿using DoenaSoft.MediaInfoHelper.DataObjects.AudioBookMetaXml;
-using DoenaSoft.MediaInfoHelper.Readers;
-using DoenaSoft.ToolBox.Generics;
-
-namespace DoenaSoft.CalculateAudioBookRunningTimes;
+﻿namespace DoenaSoft.CalculateAudioBookRunningTimes;
 
 public static class Program
 {
-    private static readonly object _lock;
-
-    private static bool _reboot;
-
-    private static bool _mp4;
-
-    static Program()
-    {
-        _lock = new object();
-    }
+    private static BookProcessor _processor;
 
     public static void Main(string[] args)
     {
@@ -44,9 +31,9 @@ public static class Program
             path = args[0];
         }
 
-        _reboot = args.Any(a => a == "/r");
+        var reboot = args.Any(a => a == "/r");
 
-        _mp4 = args.Any(a => a == "/mp4");
+        var mp4 = args.Any(a => a == "/mp4");
 
         var folder = new DirectoryInfo(path);
 
@@ -57,13 +44,15 @@ public static class Program
             return;
         }
 
+        _processor = new BookProcessor(reboot, mp4);
+
         if (args.Any(a => a == "/m"))
         {
             ProcessBooks(folder);
         }
         else
         {
-            ProcessBook(folder);
+            _processor.Process(folder);
         }
     }
 
@@ -73,7 +62,7 @@ public static class Program
 
         Parallel.ForEach(folders, new ParallelOptions() { MaxDegreeOfParallelism = 4 }, folder =>
         {
-            if (rootFolder.Name == "English" || rootFolder.Name == "Deutsch")
+            if (rootFolder.Name is "English" or "Deutsch")
             {
                 ProcessBooks(folder);
             }
@@ -83,109 +72,8 @@ public static class Program
             }
             else
             {
-                ProcessBook(folder);
+                _processor.Process(folder);
             }
         });
-    }
-
-    private static void ProcessBook(DirectoryInfo folder)
-    {
-        var metaFileName = Path.Combine(folder.FullName, $"{folder.Name}.xml");
-
-        if (_reboot && File.Exists(metaFileName))
-        {
-            return;
-        }
-
-        try
-        {
-            lock (_lock)
-            {
-                Console.WriteLine($"Processing '{folder.Name}'.");
-            }
-
-            var filePattern = _mp4
-                ? "*.mp4"
-                : "*.mp3";
-
-            var mp3Meta = (new AudioBookReader(GetRole
-                , (bookTitle) => GetName(bookTitle, "author")
-                , (bookTitle) => GetName(bookTitle, "narrator")
-                , Log))
-                .GetMeta(folder, filePattern);
-
-            (new XsltSerializer<AudioBookMeta>(new RootItemXsltSerializerDataProvider())).Serialize(metaFileName, mp3Meta);
-        }
-        catch (AggregateException aggrEx)
-        {
-            lock (_lock)
-            {
-                Console.WriteLine($"Error processing '{folder.Name}' {aggrEx.InnerException?.Message ?? aggrEx.Message}");
-            }
-        }
-        catch (Exception ex)
-        {
-            lock (_lock)
-            {
-                Console.WriteLine($"Error processing '{folder.Name}' {ex.Message}");
-            }
-        }
-    }
-
-    private static BookRole GetRole(string bookTitle, string person)
-    {
-        var answer = string.Empty;
-
-        lock (_lock)
-        {
-            while (answer != "a" && answer != "n" && answer != "b" && answer != "s")
-            {
-                Console.Write($"Is {person} (a)uthor, (n)arrator, (b)oth or (s)kip for '{bookTitle}'? ");
-
-                answer = Console.ReadLine();
-            }
-        }
-
-        switch (answer)
-        {
-            case "a":
-                {
-                    return BookRole.Author;
-                }
-            case "n":
-                {
-                    return BookRole.Narrator;
-                }
-            case "b":
-                {
-                    return BookRole.Author | BookRole.Narrator;
-                }
-            default:
-                {
-                    return BookRole.Undefined;
-                }
-        }
-    }
-
-    private static string GetName(string bookTitle, string role)
-    {
-        var answer = string.Empty;
-
-        lock (_lock)
-        {
-            Console.Write($"No {role} found for '{bookTitle}'. Please enter {role}: ");
-
-            answer = Console.ReadLine();
-        }
-
-        return answer;
-    }
-
-    private static void Log(string message)
-    {
-        lock (_lock)
-        {
-            Console.WriteLine(message);
-        }
     }
 }
