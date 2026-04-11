@@ -10,7 +10,12 @@
 		<LangVersion>latest</LangVersion>
 		<Version>$([System.DateTime]::Now.ToString("yyyy.MM.dd.HHmm"))</Version>
 		<FileVersion>$([System.DateTime]::Now.ToString("yyyy.MM.dd.HHmm"))</FileVersion>
+		<ApplicationIcon>djdsoft.ico</ApplicationIcon>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <Content Include="djdsoft.ico" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\CalculateAudioBookRunningTimesLib\CalculateAudioBookRunningTimesLib.csproj" />
