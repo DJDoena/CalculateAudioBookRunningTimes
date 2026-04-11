@@ -1,10 +1,11 @@
-﻿using DoenaSoft.MediaInfoHelper.DataObjects.AudioBookMetaXml;
+﻿using DoenaSoft.AbstractionLayer.IOServices;
+using DoenaSoft.MediaInfoHelper.DataObjects.AudioBookMetaXml;
 using DoenaSoft.MediaInfoHelper.Readers;
 using DoenaSoft.ToolBox.Generics;
 
 namespace DoenaSoft.CalculateAudioBookRunningTimes;
 
-internal sealed class BookProcessor
+public sealed class BookProcessor
 {
     private static readonly object _lock;
 
@@ -12,23 +13,27 @@ internal sealed class BookProcessor
 
     private readonly bool _mp4;
 
+    private readonly IInteraction _interaction;
+
     static BookProcessor()
     {
         _lock = new();
     }
 
     public BookProcessor(bool reboot
-        , bool mp4)
+        , bool mp4
+        , IInteraction interaction)
     {
         _reboot = reboot;
         _mp4 = mp4;
+        _interaction = interaction;
     }
 
-    internal void Process(DirectoryInfo folder)
+    public void Process(IFolderInfo folder)
     {
-        var metaFileName = Path.Combine(folder.FullName, $"{folder.Name}.xml");
+        var metaFileName = folder.IOServices.Path.Combine(folder.FullName, $"{folder.Name}.xml");
 
-        if (_reboot && File.Exists(metaFileName))
+        if (_reboot && folder.IOServices.File.Exists(metaFileName))
         {
             return;
         }
@@ -37,18 +42,18 @@ internal sealed class BookProcessor
         {
             lock (_lock)
             {
-                Console.WriteLine($"Processing '{folder.Name}'.");
+                _interaction.WriteLine($"Processing '{folder.Name}'.");
             }
 
             var filePattern = _mp4
                 ? "*.mp4"
                 : "*.mp3";
 
-            var mp3Meta = (new AudioBookReader(GetRole
-                , (bookTitle) => GetName(bookTitle, "author")
-                , (bookTitle) => GetName(bookTitle, "narrator")
-                , Log))
-                .GetMeta(folder, filePattern);
+            var mp3Meta = (new AudioBookReader(this.GetRole
+                , (bookTitle) => this.GetName(bookTitle, "author")
+                , (bookTitle) => this.GetName(bookTitle, "narrator")
+                , this.Log))
+                .GetMeta(folder.FullName, filePattern);
 
             (new XsltSerializer<AudioBookMeta>(new RootItemXsltSerializerDataProvider())).Serialize(metaFileName, mp3Meta);
         }
@@ -56,19 +61,19 @@ internal sealed class BookProcessor
         {
             lock (_lock)
             {
-                Console.WriteLine($"Error processing '{folder.Name}' {aggrEx.InnerException?.Message ?? aggrEx.Message}");
+                _interaction.WriteLine($"Error processing '{folder.Name}' {aggrEx.InnerException?.Message ?? aggrEx.Message}");
             }
         }
         catch (Exception ex)
         {
             lock (_lock)
             {
-                Console.WriteLine($"Error processing '{folder.Name}' {ex.Message}");
+                _interaction.WriteLine($"Error processing '{folder.Name}' {ex.Message}");
             }
         }
     }
 
-    private static BookRole GetRole(string bookTitle, string person)
+    private BookRole GetRole(string bookTitle, string person)
     {
         var answer = string.Empty;
 
@@ -76,9 +81,9 @@ internal sealed class BookProcessor
         {
             while (answer != "a" && answer != "n" && answer != "b" && answer != "s")
             {
-                Console.Write($"Is {person} (a)uthor, (n)arrator, (b)oth or (s)kip for '{bookTitle}'? ");
+                _interaction.Write($"Is {person} (a)uthor, (n)arrator, (b)oth or (s)kip for '{bookTitle}'? ");
 
-                answer = Console.ReadLine();
+                answer = _interaction.ReadLine();
             }
         }
 
@@ -103,25 +108,25 @@ internal sealed class BookProcessor
         }
     }
 
-    private static string GetName(string bookTitle, string role)
+    private string GetName(string bookTitle, string role)
     {
         var answer = string.Empty;
 
         lock (_lock)
         {
-            Console.Write($"No {role} found for '{bookTitle}'. Please enter {role}: ");
+            _interaction.Write($"No {role} found for '{bookTitle}'. Please enter {role}: ");
 
-            answer = Console.ReadLine();
+            answer = _interaction.ReadLine();
         }
 
         return answer;
     }
 
-    private static void Log(string message)
+    private void Log(string message)
     {
         lock (_lock)
         {
-            Console.WriteLine(message);
+            _interaction.WriteLine(message);
         }
     }
 }

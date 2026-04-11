@@ -2,7 +2,7 @@
 
 namespace DoenaSoft.CalculateAudioBookRunningTimes;
 
-internal sealed class RootItemXsltSerializerDataProvider : IXsltSerializerDataProvider
+public sealed class RootItemXsltSerializerDataProvider : IXsltSerializerDataProvider
 {
     public string GetPrefix()
         => "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<?xml-stylesheet type=\"text/xml\" href=\"#stylesheet\"?>\r\n<!DOCTYPE doc [\r\n<!ATTLIST xsl:stylesheet\r\n    id    ID    #REQUIRED>\r\n]>\r\n<doc>";
