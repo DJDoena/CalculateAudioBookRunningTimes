@@ -18,15 +18,15 @@
 		<RepositoryUrl>https://github.com/DJDoena/CalculateAudioBookRunningTimes</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>audiobook;metadata;mp3;mp4;running-time;audio;library;media</PackageTags>
-		<PackageReadmeFile>readme.md</PackageReadmeFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageIcon>djdsoft.png</PackageIcon>
 		<Copyright>2026</Copyright>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<PublishRepositoryUrl>true</PublishRepositoryUrl>
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-		<Version>1.0.3</Version>
-		<FileVersion>1.0.3</FileVersion>
+		<Version>1.0.2</Version>
+		<FileVersion>1.0.2</FileVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
