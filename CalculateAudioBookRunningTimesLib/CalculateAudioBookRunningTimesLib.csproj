@@ -4,18 +4,32 @@
 		<AssemblyName>CalculateAudioBookRunningTimesLib</AssemblyName>
 		<RootNamespace>DoenaSoft.CalculateAudioBookRunningTimes</RootNamespace>
 		<OutputType>Library</OutputType>
-		<TargetFramework>net481</TargetFramework>
-		<Platforms>x64</Platforms>
+		<TargetFrameworks>net472;net481</TargetFrameworks>
 		<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<LangVersion>latest</LangVersion>
-		<Version>$([System.DateTime]::Now.ToString("yyyy.MM.dd.HHmm"))</Version>
-		<FileVersion>$([System.DateTime]::Now.ToString("yyyy.MM.dd.HHmm"))</FileVersion>
-		<Configurations>Debug</Configurations>
+		<PackageId>DoenaSoft.CalculateAudioBookRunningTimes</PackageId>
+		<Authors>DJ Doena</Authors>
+		<Company>Doena Soft.</Company>
+		<Product>CalculateAudioBookRunningTimes</Product>
+		<Description>A library for extracting and calculating audiobook metadata including running times, chapters, authors, and narrators. Supports MP3 and MP4 audiobook formats with customizable interaction handling.</Description>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/DJDoena/CalculateAudioBookRunningTimes</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/DJDoena/CalculateAudioBookRunningTimes</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>audiobook;metadata;mp3;mp4;running-time;audio;library;media</PackageTags>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<Copyright>2026</Copyright>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<Version>1.0.0</Version>
+		<FileVersion>1.0.0</FileVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DoenaSoft.AbstractionLayer.IO" Version="5.0.1" />
+		<None Include="README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="DoenaSoft.MediaInfoHelper" Version="3.1.12" />
 	</ItemGroup>
 

@@ -1,10 +1,12 @@
-﻿using DoenaSoft.AbstractionLayer.IOServices;
-using DoenaSoft.MediaInfoHelper.DataObjects.AudioBookMetaXml;
+﻿using DoenaSoft.MediaInfoHelper.DataObjects.AudioBookMetaXml;
 using DoenaSoft.MediaInfoHelper.Readers;
 using DoenaSoft.ToolBox.Generics;
 
 namespace DoenaSoft.CalculateAudioBookRunningTimes;
 
+/// <summary>
+/// Processes individual audiobook folders to extract and save metadata.
+/// </summary>
 public sealed class BookProcessor
 {
     private static readonly object _lock;
@@ -20,6 +22,12 @@ public sealed class BookProcessor
         _lock = new();
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BookProcessor"/> class.
+    /// </summary>
+    /// <param name="reboot">If true, skips processing folders that already have metadata files.</param>
+    /// <param name="mp4">If true, processes MP4 files; otherwise processes MP3 files.</param>
+    /// <param name="interaction">The interaction interface for user communication.</param>
     public BookProcessor(bool reboot
         , bool mp4
         , IInteraction interaction)
@@ -29,11 +37,15 @@ public sealed class BookProcessor
         _interaction = interaction;
     }
 
-    public void Process(IFolderInfo folder)
+    /// <summary>
+    /// Processes a folder to extract audiobook metadata and save it to an XML file.
+    /// </summary>
+    /// <param name="folder">The folder containing audiobook files.</param>
+    public void Process(DirectoryInfo folder)
     {
-        var metaFileName = folder.IOServices.Path.Combine(folder.FullName, $"{folder.Name}.xml");
+        var metaFileName = Path.Combine(folder.FullName, $"{folder.Name}.xml");
 
-        if (_reboot && folder.IOServices.File.Exists(metaFileName))
+        if (_reboot && File.Exists(metaFileName))
         {
             return;
         }

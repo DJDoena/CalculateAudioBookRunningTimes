@@ -9,8 +9,6 @@
 		<LangVersion>latest</LangVersion>
 		<Version>$([System.DateTime]::Now.ToString("yyyy.MM.dd.HHmm"))</Version>
 		<FileVersion>$([System.DateTime]::Now.ToString("yyyy.MM.dd.HHmm"))</FileVersion>
-		<Platforms>x64</Platforms>
-		<Configurations>Debug</Configurations>
 	</PropertyGroup>
 
 	<ItemGroup>

@@ -5,21 +5,15 @@
 		<RootNamespace>DoenaSoft.CalculateAudioBookRunningTimes</RootNamespace>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net481</TargetFramework>
-		<Platforms>x64</Platforms>
 		<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<LangVersion>latest</LangVersion>
 		<Version>$([System.DateTime]::Now.ToString("yyyy.MM.dd.HHmm"))</Version>
 		<FileVersion>$([System.DateTime]::Now.ToString("yyyy.MM.dd.HHmm"))</FileVersion>
-		<Configurations>Debug</Configurations>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="DoenaSoft.AbstractionLayer.IO.Default" Version="1.0.2" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\CalculateAudioBookRunningTimesLib\CalculateAudioBookRunningTimesLib.csproj" />
+		<ProjectReference Include="..\CalculateAudioBookRunningTimesLib\CalculateAudioBookRunningTimesLib.csproj" />
 	</ItemGroup>
 
 </Project>

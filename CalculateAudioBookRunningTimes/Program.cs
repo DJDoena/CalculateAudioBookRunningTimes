@@ -1,6 +1,4 @@
-﻿using DoenaSoft.AbstractionLayer.IOServices;
-
-namespace DoenaSoft.CalculateAudioBookRunningTimes;
+﻿namespace DoenaSoft.CalculateAudioBookRunningTimes;
 
 public static class Program
 {
@@ -17,8 +15,6 @@ public static class Program
             return;
         }
 
-        var ioServices = new IOServices();
-
         string path;
         if (args.Any(a => a == "/getpath"))
         {
@@ -28,7 +24,7 @@ public static class Program
 
                 path = interaction.ReadLine().Trim().Trim('"');
 
-            } while (!ioServices.Folder.Exists(path));
+            } while (!Directory.Exists(path));
         }
         else
         {
@@ -39,7 +35,7 @@ public static class Program
 
         var mp4 = args.Any(a => a == "/mp4");
 
-        var folder = ioServices.GetFolder(path);
+        var folder = new DirectoryInfo(path);
 
         if (!folder.Exists)
         {
