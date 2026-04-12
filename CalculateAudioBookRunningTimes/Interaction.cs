@@ -1,4 +1,6 @@
-﻿namespace DoenaSoft.CalculateAudioBookRunningTimes;
+﻿using DoenaSoft.AbstractionLayer.UI.Contracts;
+
+namespace DoenaSoft.CalculateAudioBookRunningTimes;
 
 internal sealed class Interaction : IInteraction
 {
@@ -19,4 +21,7 @@ internal sealed class Interaction : IInteraction
             Console.WriteLine(message);
         }
     }
+
+    public char ReadKey(bool intercept = false)
+        => Console.ReadKey(intercept).KeyChar;
 }
