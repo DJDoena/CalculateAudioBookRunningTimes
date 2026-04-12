@@ -1,4 +1,5 @@
-﻿using DoenaSoft.MediaInfoHelper.DataObjects.AudioBookMetaXml;
+﻿using DoenaSoft.AbstractionLayer.UI.Contracts;
+using DoenaSoft.MediaInfoHelper.DataObjects.AudioBookMetaXml;
 using DoenaSoft.MediaInfoHelper.Readers;
 using DoenaSoft.ToolBox.Generics;
 
@@ -91,7 +92,7 @@ public sealed class BookProcessor
 
         lock (_lock)
         {
-            while (answer != "a" && answer != "n" && answer != "b" && answer != "s")
+            while (answer is not "a" and not "n" and not "b" and not "s")
             {
                 _interaction.Write($"Is {person} (a)uthor, (n)arrator, (b)oth or (s)kip for '{bookTitle}'? ");
 
