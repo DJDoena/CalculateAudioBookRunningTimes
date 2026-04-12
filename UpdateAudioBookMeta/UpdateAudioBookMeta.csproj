@@ -12,7 +12,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\CalculateAudioBookRunningTimesLib\CalculateAudioBookRunningTimesLib.csproj" />
+	  <PackageReference Include="DoenaSoft.CalculateAudioBookRunningTimes" Version="1.0.2" />
 	</ItemGroup>
 
 </Project>
